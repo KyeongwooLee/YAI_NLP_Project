@@ -51,6 +51,7 @@ import importlib
 required = [
     "torch",
     "transformers",
+    "huggingface_hub",
     "peft",
     "datasets",
     "safetensors",

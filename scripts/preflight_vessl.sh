@@ -39,7 +39,7 @@ PY
 
 echo "[4/5] Model config check"
 if [[ -z "${BASE_MODEL_NAME:-}" ]]; then
-  echo "BASE_MODEL_NAME is not set. Default model will be used: meta-llama/Meta-Llama-3-8B-Instruct"
+  echo "BASE_MODEL_NAME is not set. Default model will be used: meta-llama/Llama-3.1-8B-Instruct"
 else
   echo "BASE_MODEL_NAME=${BASE_MODEL_NAME}"
 fi

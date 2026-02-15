@@ -16,7 +16,7 @@ DEFAULT_REPORTS_DIR = DEFAULT_ARTIFACTS_DIR / "reports"
 @dataclass
 class ProjectConfig:
     base_model_name: str = os.getenv(
-        "BASE_MODEL_NAME", "meta-llama/Meta-Llama-3-8B-Instruct"
+        "BASE_MODEL_NAME", "meta-llama/Llama-3.1-8B-Instruct"
     )
     local_files_only: bool = os.getenv("LOCAL_FILES_ONLY", "1") == "1"
     use_4bit: bool = os.getenv("USE_4BIT", "0") == "1"

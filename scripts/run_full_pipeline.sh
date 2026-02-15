@@ -11,7 +11,7 @@ if [[ -d ".venv" ]]; then
 fi
 
 if [[ -z "${BASE_MODEL_NAME:-}" ]]; then
-  echo "BASE_MODEL_NAME is not set. Using config default: meta-llama/Meta-Llama-3-8B-Instruct"
+  echo "BASE_MODEL_NAME is not set. Using config default: meta-llama/Llama-3.1-8B-Instruct"
 fi
 
 export LOCAL_FILES_ONLY="${LOCAL_FILES_ONLY:-0}"
