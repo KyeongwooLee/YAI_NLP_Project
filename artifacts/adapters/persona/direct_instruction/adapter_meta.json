@@ -1,0 +1,16 @@
+{
+  "domain": null,
+  "persona": "direct_instruction",
+  "style_instruction": "Explain directly in concise steps with clear definitions and minimal narrative.",
+  "distribution": {
+    "domain": {
+      "science": 2,
+      "history": 1,
+      "general": 1
+    },
+    "persona": {
+      "direct_instruction": 4
+    }
+  },
+  "selected_examples": 4
+}

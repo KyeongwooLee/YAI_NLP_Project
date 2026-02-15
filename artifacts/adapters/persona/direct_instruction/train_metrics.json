@@ -1,0 +1,22 @@
+{
+  "base_model_name": "/home/marimmo/.cache/huggingface/hub/models--sshleifer--tiny-gpt2/snapshots/5f91d94bd9cd7190a9f3216ff93cd1dd95f2c7be",
+  "train_size": 3,
+  "eval_size": 1,
+  "rank": 8,
+  "alpha": 16,
+  "dropout": 0.05,
+  "persona_instruction": "Explain directly in concise steps with clear definitions and minimal narrative.",
+  "metrics": {
+    "train_runtime": 1.0591,
+    "train_samples_per_second": 0.028,
+    "train_steps_per_second": 0.944,
+    "total_flos": 6119424.0,
+    "train_loss": 10.75300407409668,
+    "epoch": 1.0,
+    "eval_eval_loss": 10.77012825012207,
+    "eval_eval_runtime": 0.0569,
+    "eval_eval_samples_per_second": 17.587,
+    "eval_eval_steps_per_second": 17.587,
+    "eval_epoch": 1.0
+  }
+}
