@@ -11,4 +11,8 @@ if [[ -d ".venv" ]]; then
 fi
 
 QUERY="${1:-Can you explain Newton's second law in a simple way?}"
-"${PYTHON_BIN}" -m src.inference.generate --query "${QUERY}" --max-new-tokens "${MAX_NEW_TOKENS:-180}"
+"${PYTHON_BIN}" -m src.inference.generate \
+  --query "${QUERY}" \
+  --student-preference "${STUDENT_PREFERENCE:-}" \
+  --teacher-preference "${TEACHER_PREFERENCE:-}" \
+  --max-new-tokens "${MAX_NEW_TOKENS:-180}"

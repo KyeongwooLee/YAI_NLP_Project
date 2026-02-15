@@ -187,11 +187,23 @@ def train_lora_adapter(
 
     tokenizer = load_tokenizer(config.base_model_name, config.local_files_only)
     base_model = load_base_model(config.base_model_name, config)
+    model = None
     if resume_adapter_path is not None and resume_adapter_path.exists():
-        model = PeftModel.from_pretrained(
-            base_model, str(resume_adapter_path), is_trainable=True
-        )
-    else:
+        try:
+            model = PeftModel.from_pretrained(
+                base_model, str(resume_adapter_path), is_trainable=True
+            )
+        except (ValueError, RuntimeError) as error:
+            warnings.warn(
+                (
+                    f"Resume adapter load failed at {resume_adapter_path} ({error}). "
+                    "Falling back to fresh LoRA initialization for this base model."
+                ),
+                stacklevel=2,
+            )
+            model = None
+
+    if model is None:
         lora_config = build_lora_config(
             base_model,
             rank=rank,

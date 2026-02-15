@@ -11,6 +11,7 @@ DEFAULT_ARTIFACTS_DIR = PROJECT_ROOT / "artifacts"
 DEFAULT_ADAPTERS_DIR = DEFAULT_ARTIFACTS_DIR / "adapters"
 DEFAULT_LOGS_DIR = DEFAULT_ARTIFACTS_DIR / "logs"
 DEFAULT_REPORTS_DIR = DEFAULT_ARTIFACTS_DIR / "reports"
+LORA_HUB_DOMAIN_DIR_ENV = os.getenv("LORA_HUB_DOMAIN_DIR")
 
 
 @dataclass
@@ -51,6 +52,9 @@ class ProjectConfig:
         os.getenv("PERSONA_ADAPTERS_DIR", str(DEFAULT_ADAPTERS_DIR / "persona"))
     )
     router_dir: Path = Path(os.getenv("ROUTER_DIR", str(DEFAULT_ARTIFACTS_DIR / "router")))
+    lora_hub_domain_dir: Path | None = (
+        Path(LORA_HUB_DOMAIN_DIR_ENV) if LORA_HUB_DOMAIN_DIR_ENV else None
+    )
 
     def __post_init__(self) -> None:
         if "ADAPTERS_DIR" not in os.environ:

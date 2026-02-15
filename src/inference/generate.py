@@ -112,11 +112,17 @@ def run_inference(
     *,
     config: ProjectConfig,
     max_new_tokens: int = 180,
+    student_preference: str = "",
+    teacher_preference: str = "",
 ) -> dict:
     ensure_project_dirs(config)
     config.base_model_name = resolve_base_model_name(config)
     router_name, router = _load_router(config)
-    route = router.route(query)  # type: ignore[attr-defined]
+    route = router.route(  # type: ignore[attr-defined]
+        query,
+        student_preference_hint=student_preference,
+        teacher_preference_hint=teacher_preference,
+    )
 
     domain_candidates = _list_domain_adapter_candidates(config, route.domain)
     persona_adapter_path = config.persona_adapters_dir / route.persona
@@ -168,6 +174,8 @@ def run_inference(
 
     result = {
         "query": query,
+        "student_preference": student_preference,
+        "teacher_preference": teacher_preference,
         "answer": answer,
         "router": router_name,
         "selected_domain": route.domain,
@@ -186,12 +194,16 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run routed inference.")
     parser.add_argument("--query", type=str, required=True)
     parser.add_argument("--max-new-tokens", type=int, default=180)
+    parser.add_argument("--student-preference", type=str, default="")
+    parser.add_argument("--teacher-preference", type=str, default="")
     args = parser.parse_args()
     config = ProjectConfig()
     result = run_inference(
         args.query,
         config=config,
         max_new_tokens=args.max_new_tokens,
+        student_preference=args.student_preference,
+        teacher_preference=args.teacher_preference,
     )
     print(json.dumps(result, ensure_ascii=False, indent=2))
 

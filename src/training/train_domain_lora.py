@@ -20,6 +20,7 @@ def train_domain_adapter(
     config: ProjectConfig,
     output_dir: Path | None = None,
     max_examples: int | None = None,
+    resume_adapter_path: Path | None = None,
 ) -> dict:
     ensure_project_dirs(config)
     config.base_model_name = resolve_base_model_name(config)
@@ -42,6 +43,7 @@ def train_domain_adapter(
         rank=16,
         alpha=32,
         dropout=0.05,
+        resume_adapter_path=resume_adapter_path,
     )
     save_examples_metadata(
         adapter_dir,

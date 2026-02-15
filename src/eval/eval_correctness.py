@@ -32,7 +32,13 @@ def run_correctness_eval(
 
     scores = []
     for example in selected:
-        inference = run_inference(example.prompt, config=config, max_new_tokens=120)
+        inference = run_inference(
+            example.prompt,
+            config=config,
+            max_new_tokens=120,
+            student_preference=example.student_preference,
+            teacher_preference=example.teacher_preference,
+        )
         prediction_tokens = _tokenize_for_overlap(inference["answer"])
         target_tokens = _tokenize_for_overlap(example.response)
         overlap = len(prediction_tokens & target_tokens)

@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from src.data.loader import TrainingExample
+from src.data.preprocess import normalize_persona_label
 
 
 @dataclass
@@ -70,13 +71,21 @@ class RouterV2:
     def __init__(self) -> None:
         self.domain_model = _MultinomialNB()
         self.persona_model = _MultinomialNB()
-        self.default_persona = "neutral"
+        self.default_persona = "direct_instruction"
         self._is_fitted = False
 
     def fit(self, examples: list[TrainingExample]) -> None:
         if not examples:
             raise ValueError("RouterV2 requires at least one example.")
-        texts = [f"{example.topic} {example.prompt}" for example in examples]
+        texts = [
+            (
+                f"{example.topic} {example.prompt} "
+                f"student_pref={example.student_preference} "
+                f"teacher_pref={example.teacher_preference} "
+                f"teacher_style={example.teacher_style}"
+            )
+            for example in examples
+        ]
         domains = [example.domain for example in examples]
         personas = [example.persona for example in examples]
 
@@ -85,7 +94,12 @@ class RouterV2:
         self.default_persona = Counter(personas).most_common(1)[0][0]
         self._is_fitted = True
 
-    def route(self, query: str) -> RouterV2Decision:
+    def route(
+        self,
+        query: str,
+        student_preference_hint: str = "",
+        teacher_preference_hint: str = "",
+    ) -> RouterV2Decision:
         if not self._is_fitted:
             raise RuntimeError("RouterV2 is not fitted.")
 
@@ -95,6 +109,12 @@ class RouterV2:
 
         persona_probs = self.persona_model.predict_proba(query)
         persona = max(persona_probs, key=persona_probs.get) if persona_probs else self.default_persona
+        hinted_persona = normalize_persona_label(
+            student_preference_hint,
+            teacher_preference_hint,
+        )
+        if student_preference_hint or teacher_preference_hint:
+            persona = hinted_persona
         persona_probability = float(persona_probs.get(persona, 1.0))
 
         persona_weight = min(0.5, max(0.2, 1.0 - domain_probability))

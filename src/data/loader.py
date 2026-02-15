@@ -27,6 +27,9 @@ class TrainingExample:
     persona: str
     prompt: str
     response: str
+    student_preference: str = ""
+    teacher_preference: str = ""
+    teacher_style: str = ""
 
 
 def _normalize_role(role: str) -> str:
@@ -103,7 +106,11 @@ def iter_student_teacher_pairs(records: Sequence[DialogueRecord]) -> Iterator[Tr
                 continue
 
             context_window = history[:-1][-6:]
-            prompt = "\n".join(context_window)
+            preference_header = [
+                f"Student preference: {record.student_preferences}".strip(),
+                f"Teacher preference: {record.teacher_preferences}".strip(),
+            ]
+            prompt = "\n".join(preference_header + context_window)
             response = turn.text
             yield TrainingExample(
                 topic=record.topic,
@@ -111,4 +118,6 @@ def iter_student_teacher_pairs(records: Sequence[DialogueRecord]) -> Iterator[Tr
                 persona=record.student_preferences,
                 prompt=prompt,
                 response=response,
+                student_preference=record.student_preferences,
+                teacher_preference=record.teacher_preferences,
             )

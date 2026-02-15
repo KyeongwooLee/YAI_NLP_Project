@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from src.data.loader import TrainingExample
-from src.data.preprocess import DOMAIN_KEYWORDS
+from src.data.preprocess import DOMAIN_KEYWORDS, normalize_persona_label
 
 
 @dataclass
@@ -41,6 +41,7 @@ class RouterV1:
     def __init__(self) -> None:
         self.domain_profiles: dict[str, Counter[str]] = {}
         self.persona_counts: dict[str, int] = {}
+        self.default_persona = "direct_instruction"
         self.is_fitted = False
 
     def fit(self, examples: list[TrainingExample]) -> None:
@@ -48,10 +49,17 @@ class RouterV1:
             raise ValueError("RouterV1 requires at least one example.")
         profile_builder: dict[str, Counter[str]] = defaultdict(Counter)
         for example in examples:
-            text = f"{example.topic} {example.prompt} {example.response}"
+            text = (
+                f"{example.topic} {example.prompt} {example.response} "
+                f"student_pref={example.student_preference} "
+                f"teacher_pref={example.teacher_preference} "
+                f"teacher_style={example.teacher_style}"
+            )
             profile_builder[example.domain].update(_tokenize(text))
             self.persona_counts[example.persona] = self.persona_counts.get(example.persona, 0) + 1
         self.domain_profiles = dict(profile_builder)
+        if self.persona_counts:
+            self.default_persona = max(self.persona_counts, key=self.persona_counts.get)
         self.is_fitted = True
 
     def _keyword_scores(self, query: str) -> dict[str, float]:
@@ -62,7 +70,13 @@ class RouterV1:
         scores["general"] = 0.1
         return scores
 
-    def route(self, query: str, persona_hint: str = "neutral") -> RouteDecision:
+    def route(
+        self,
+        query: str,
+        persona_hint: str | None = None,
+        student_preference_hint: str = "",
+        teacher_preference_hint: str = "",
+    ) -> RouteDecision:
         if not self.is_fitted:
             raise RuntimeError("RouterV1 is not fitted.")
         query_counter = Counter(_tokenize(query))
@@ -74,11 +88,17 @@ class RouterV1:
             score_map[domain] = 0.75 * semantic + 0.25 * keyword
 
         chosen_domain = max(score_map, key=score_map.get)
-        persona_weight = 0.35 if persona_hint == "neutral" else 0.45
+        chosen_persona = normalize_persona_label(
+            student_preference_hint or (persona_hint or ""),
+            teacher_preference_hint,
+        )
+        if not chosen_persona:
+            chosen_persona = self.default_persona
+        persona_weight = 0.45
         domain_weight = 1.0 - persona_weight
         return RouteDecision(
             domain=chosen_domain,
-            persona=persona_hint,
+            persona=chosen_persona,
             domain_weight=domain_weight,
             persona_weight=persona_weight,
             scores=score_map,

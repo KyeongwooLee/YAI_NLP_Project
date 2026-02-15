@@ -13,13 +13,13 @@ from src.inference.generate import run_inference
 PERSONA_RULES: dict[str, tuple[str, ...]] = {
     "creative_gamified": ("imagine", "story", "challenge", "game"),
     "direct_instruction": ("step", "definition", "first", "second"),
-    "hands_on": ("try", "exercise", "practice", "example"),
-    "neutral": ("explain", "example"),
+    "hands_on_applied": ("try", "exercise", "practice", "example"),
+    "interactive_inquiry": ("question", "why", "check", "think"),
 }
 
 
 def _persona_score(answer: str, persona: str) -> float:
-    keywords = PERSONA_RULES.get(persona, PERSONA_RULES["neutral"])
+    keywords = PERSONA_RULES.get(persona, PERSONA_RULES["direct_instruction"])
     lowered = answer.lower()
     matches = sum(1 for keyword in keywords if keyword in lowered)
     return matches / max(1, len(keywords))
@@ -42,7 +42,13 @@ def run_personalization_eval(
 
     scores = []
     for example in selected:
-        inference = run_inference(example.prompt, config=config, max_new_tokens=120)
+        inference = run_inference(
+            example.prompt,
+            config=config,
+            max_new_tokens=120,
+            student_preference=example.student_preference,
+            teacher_preference=example.teacher_preference,
+        )
         score = _persona_score(inference["answer"], example.persona)
         scores.append(score)
 
